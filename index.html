@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Bike Sensor Data Visualization</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link href="styles.css" rel="stylesheet" />
+  <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+  <script>
+    var mapboxgl = maplibregl;
+  </script>
+</head>
+<body>
+<div id="mapContainer">
+  <button id="fullscreenBtn" title="Toggle Fullscreen">⛶</button>
+
+  <!-- Manual Toggle Button -->
+  <button id="manualToggleBtn" title="Open User Manual">
+    Manual
+  </button>
+
+  <!-- Sliding Manual Panel -->
+  <div id="manualPanel">
+    <div class="manual-header">
+      <h3>Cycling Behaviour Dashboard</h3>
+      <button id="manualCloseBtn" title="Close Manual">✕</button>
+    </div>
+    <div class="manual-content">
+      <section>
+        <h4>Purpose of the Dashboard</h4>
+        <p>
+          This dashboard supports <strong>cycling-behaviour-informed policy
+          planning</strong> for urban planners and officials.
+        </p>
+        <p>
+          It combines cycling sensor data (speed and road quality) with
+          aggregated road segment analysis, fetched directly from the cloud.
+        </p>
+      </section>
+      <section>
+        <h4>How to Read the Map</h4>
+        <p>
+          The map visualises the local cycling network using selectable data layers.
+          Each layer has its own scale, legend, and policy interpretation.
+        </p>
+      </section>
+      <section>
+        <h4>Available Data Layers</h4>
+        <h5>Speed</h5>
+        <p>
+          Displays average cycling speed across recorded trips, supporting the
+          identification of slow or fast corridors.
+        </p>
+        <h5>Road Quality</h5>
+        <p>
+          Based on third-party infrastructure data, categorised from "Perfect" to
+          "No road", supporting infrastructure assessment and maintenance planning.
+        </p>
+        <h5>Averaged Road Segments</h5>
+        <p>
+          Aggregates speed and road quality into averaged scores per road segment,
+          supporting corridor-level analysis.
+        </p>
+        <h5>Composite Score (Quality + Speed)</h5>
+        <p>
+          Within the averaged road segments, you'll see a subfilter which combines infrastructure
+          condition and cycling performance into a single indicator for comparative assessment.
+        </p>
+        <h5>Sudden Braking</h5>
+        <p>
+          Flags locations where a cyclist decelerated suddenly, accumulated across all
+          recorded trips. Braking is detected when a cyclist decelerates at more than 2 km/h per second— 
+          meaning speed drops by at least 2 km/h within a single one-second GPS interval.
+          This threshold was adjusted so as to distinguish genuine sudden braking (e.g. at 
+          intersections, obstacles, or unsafe road conditions) from normal slowdowns.
+        </p>
+        <h5>Crashes &amp; Falls</h5>
+        <p>
+          A "g" is a unit of acceleration equal to Earth's gravity (9.8 m/s²)— 
+          the standard way to measure impact force.
+        </p>
+        <p>
+          An incident is flagged when the accelerometer registers a sharp impact
+          of 6g or greater. Because potholes, rough terrain, and other everyday jolts 
+          can also produce a brief spike above that threshold, a raw impact reading 
+          isn't treated as a confirmed crash until it passes three independent checks:
+        </p>
+        <p>
+          <strong>1.</strong> The bike actually stops. Within 3 seconds of the impact, the sensor readings must settle 
+          into a narrow band (varying by no more than 3g) for at least 1 continuous second, and GPS must 
+          confirm the bike stopped moving— its reported speed dropping near zero and its position staying put— 
+          for that same stretch. Both signals have to agree; if either keeps showing motion or vibration, 
+          the spike is treated as normal riding activity (e.g. hitting a pothole and continuing to ride).
+        </p>
+        <p>
+          <strong>2.</strong> The wheel actually stalls. Separately from the accelerometer/GPS check above, the system watches 
+          the wheel's own rotation for a stall— the point where it stops turning and, if the bike gets back underway, 
+          resumes. If that recovery takes longer than 120 seconds, the event is treated as a parking artifact (e.g. the 
+          bike being walked, lifted, or left standing) rather than a crash, and is rejected even if the first check passed.
+        </p>
+        <p>
+          <strong>3.</strong> The bike was actually moving beforehand. The system looks back up to 10 seconds before the impact to confirm 
+          the bike was in motion. This catches cases where a stationary or parked bike gets knocked, dropped, or otherwise 
+          jolted— a genuine impact reading, but not a riding crash— and excludes it from the count.
+        </p>
+        <p>
+          Confirmed incidents are described using three independent dimensions:
+          impact intensity (Minor, Hard, or Severe), accident type (Stationary Fall, Low-Speed Fall,
+          High-Speed Fall, or Unclassified), and outcome (Resolved or Unresolved). Impact intensity is 
+          derived from peak_g, the peak absolute lateral acceleration during the impact, where 'minor' is < 8 g, 
+          'hard' is 8–11 g, and 'severe' is > 11 g. Accident type is based on the bike's
+          estimated wheel speed immediately before impact. Outcome describes
+          whether the bike resumes after the stop; an unresolved incident is one
+          where the wheel does not resume during the recorded route.
+        </p>
+      </section>
+      <section>
+        <h4>Using Filters and Interpretations</h4>
+        <p>
+          Filters can be activated individually or in combination. Each combination
+          reflects a deliberate analytical perspective chosen by the user.
+        </p>
+        <p>
+          The dashboard does not prescribe a single interpretation, but supports
+          exploratory, policy-driven analysis.
+        </p>
+      </section>
+      <section>
+        <h4>Responsible Use</h4>
+        <p>
+          Behavioural indicators should be understood as signals rather than
+          definitive diagnoses. Results should be interpreted alongside contextual
+          knowledge of street design, traffic conditions, and policy objectives.
+        </p>
+      </section>
+    </div>
+  </div>
+
+  <!-- Mobile slide-out tab for controls panel -->
+  <div id="controlsTab">Filters</div>
+
+  <div id="map"></div>
+
+  <div id="controls">
+    <h3>Bike Routes</h3>
+
+    <div class="control-group">
+      <label class="checkbox-label">
+        <input type="checkbox" id="speedColorsCheckbox">
+        Speed
+      </label>
+    </div>
+
+    <div class="radio-group" id="speedModeGroup">
+      <label class="radio-label">
+        <input type="radio" name="speedMode" value="gradient" checked>
+        Smooth Gradient
+      </label>
+      <label class="radio-label">
+        <input type="radio" name="speedMode" value="categories">
+        Speed Categories
+      </label>
+    </div>
+
+    <div class="control-group">
+      <label class="checkbox-label">
+        <input type="checkbox" id="roadQualityCheckbox">
+        Road Quality
+      </label>
+    </div>
+
+    <div class="control-group">
+      <label class="checkbox-label">
+        <input type="checkbox" id="averagedSegmentsCheckbox">
+        Averaged Road Segments
+      </label>
+    </div>
+
+    <div class="radio-group" id="averagedModeGroup">
+      <label class="radio-label">
+        <input type="radio" name="averagedMode" value="composite" checked>
+        Composite Score (Quality + Speed)
+      </label>
+      <label class="radio-label">
+        <input type="radio" name="averagedMode" value="speed">
+        Average Speed
+      </label>
+      <label class="radio-label">
+        <input type="radio" name="averagedMode" value="quality">
+        Road Quality
+      </label>
+    </div>
+
+    <div class="control-group">
+      <label class="checkbox-label">
+        <input type="checkbox" id="brakingCheckbox">
+        Sudden Braking
+      </label>
+    </div>
+
+    <div class="control-group">
+      <label class="checkbox-label">
+        <input type="checkbox" id="crashCheckbox">
+        Crashes &amp; Falls
+      </label>
+    </div>
+
+    <div class="control-group filter-accordion">
+      <button type="button" id="filterAccordionToggle" class="filter-accordion-header">
+        <span>Filter Trips</span>
+        <span class="filter-accordion-chevron">⌄</span>
+      </button>
+      <div id="filterAccordionContent" class="filter-accordion-content" hidden>
+        <div class="filter-section">
+          <div class="filter-section-label">Dates</div>
+          <div class="filter-date-range">
+            <div class="filter-date-field">
+              <label for="dateFilterFrom">From</label>
+              <input type="date" id="dateFilterFrom" lang="en-GB">
+            </div>
+            <div class="filter-date-field">
+              <label for="dateFilterTo">To</label>
+              <input type="date" id="dateFilterTo" lang="en-GB">
+            </div>
+          </div>
+          <div class="filter-date-presets">
+            <button type="button" class="filter-preset-btn" data-preset="all">All</button>
+            <button type="button" class="filter-preset-btn" data-preset="today">Today</button>
+            <button type="button" class="filter-preset-btn" data-preset="yesterday">Yesterday</button>
+            <button type="button" class="filter-preset-btn" data-preset="last7">Last 7 Days</button>
+            <button type="button" class="filter-preset-btn" data-preset="last30">Last 30 Days</button>
+          </div>
+        </div>
+        <div class="filter-section">
+          <div class="filter-section-label">Sensors</div>
+          <label class="filter-sensor-item filter-sensor-all">
+            <input type="checkbox" id="filterSensorAll" checked>
+            <span>All</span>
+          </label>
+          <div id="filterSensorList">
+            <!-- populated dynamically by renderFilterPanel() -->
+          </div>
+        </div>
+        <div id="filterMatchCount" class="filter-match-count"></div>
+      </div>
+    </div>
+
+    <button id="resetButton">↩ Reset View</button>
+  </div>
+
+  <div id="stats">
+    <h4>Trip Info</h4>
+    <div class="stat-row" id="statTripRow">
+      <span class="stat-label">Total trips:</span>
+      <span class="stat-value" id="statTrips">—</span>
+    </div>
+    <div class="stat-row" id="statDistanceRow">
+      <span class="stat-label">Total distance:</span>
+      <span class="stat-value" id="statDistance">—</span>
+    </div>
+    <div class="stat-row" id="statAvgSpeedRow">
+      <span class="stat-label">Average speed:</span>
+      <span class="stat-value" id="statAvgSpeed">—</span>
+    </div>
+    <div class="stat-row" id="statTotalTimeRow">
+      <span class="stat-label">Total time:</span>
+      <span class="stat-value" id="statTotalTime">—</span>
+    </div>
+    <div class="stat-row" id="selectedTripRow">
+      <span class="stat-label">Selected:</span>
+      <span class="stat-value" id="selectedTrip">—</span>
+    </div>
+  </div>
+
+  <div class="legend" id="speedLegend" style="display:none;">
+    <h4>Speed (km/h)</h4>
+    <div class="speed-legend-item"><div class="speed-color-box" style="background:#808080;"></div><span>Stopped (0–2)</span></div>
+    <div class="speed-legend-item"><div class="speed-color-box" style="background:#DC2626;"></div><span>Very Slow (2–5)</span></div>
+    <div class="speed-legend-item"><div class="speed-color-box" style="background:#F97316;"></div><span>Slow (5–10)</span></div>
+    <div class="speed-legend-item"><div class="speed-color-box" style="background:#FACC15;"></div><span>Moderate (10–15)</span></div>
+    <div class="speed-legend-item"><div class="speed-color-box" style="background:#22C55E;"></div><span>Fast (15–20)</span></div>
+    <div class="speed-legend-item"><div class="speed-color-box" style="background:#3B82F6;"></div><span>Very Fast (20–25)</span></div>
+    <div class="speed-legend-item"><div class="speed-color-box" style="background:#bb06d7;"></div><span>Extreme (25+)</span></div>
+  </div>
+
+  <div class="legend" id="roadQualityLegend" style="display:none;">
+    <h4>Road Quality</h4>
+    <div class="speed-legend-item"><div class="speed-color-box" style="background:#22C55E;"></div><span>1 – Perfect</span></div>
+    <div class="speed-legend-item"><div class="speed-color-box" style="background:#84CC16;"></div><span>2 – Normal</span></div>
+    <div class="speed-legend-item"><div class="speed-color-box" style="background:#FACC15;"></div><span>3 – Outdated</span></div>
+    <div class="speed-legend-item"><div class="speed-color-box" style="background:#F97316;"></div><span>4 – Bad</span></div>
+    <div class="speed-legend-item"><div class="speed-color-box" style="background:#DC2626;"></div><span>5 – No road</span></div>
+    <div class="speed-legend-item"><div class="speed-color-box" style="background:#808080;"></div><span>Unknown</span></div>
+  </div>
+
+  <div class="legend" id="averagedSegmentsLegend" style="display:none;">
+    <h4>Averaged Road Segments</h4>
+    <div id="compositeLegendItems">
+      <p class="legend-note">Combined score based on quality and speed</p>
+      <div class="speed-legend-item"><div class="speed-color-box" style="background:#22C55E;"></div><span>Excellent (0–20)</span></div>
+      <div class="speed-legend-item"><div class="speed-color-box" style="background:#84CC16;"></div><span>Good (20–40)</span></div>
+      <div class="speed-legend-item"><div class="speed-color-box" style="background:#FACC15;"></div><span>Moderate (40–60)</span></div>
+      <div class="speed-legend-item"><div class="speed-color-box" style="background:#F97316;"></div><span>Poor (60–80)</span></div>
+      <div class="speed-legend-item"><div class="speed-color-box" style="background:#DC2626;"></div><span>Critical (80–100)</span></div>
+    </div>
+    <div id="avgSpeedLegendItems" style="display:none;">
+      <div class="speed-legend-item"><div class="speed-color-box" style="background:#DC2626;"></div><span>Very Slow (0–5 km/h)</span></div>
+      <div class="speed-legend-item"><div class="speed-color-box" style="background:#F97316;"></div><span>Slow (5–10 km/h)</span></div>
+      <div class="speed-legend-item"><div class="speed-color-box" style="background:#FACC15;"></div><span>Moderate (10–15 km/h)</span></div>
+      <div class="speed-legend-item"><div class="speed-color-box" style="background:#22C55E;"></div><span>Fast (15–20 km/h)</span></div>
+      <div class="speed-legend-item"><div class="speed-color-box" style="background:#3B82F6;"></div><span>Very Fast (20–25 km/h)</span></div>
+      <div class="speed-legend-item"><div class="speed-color-box" style="background:#bb06d7;"></div><span>Extreme (25+ km/h)</span></div>
+    </div>
+    <div id="avgQualityLegendItems" style="display:none;">
+      <div class="speed-legend-item"><div class="speed-color-box" style="background:#22C55E;"></div><span>Perfect (1.0–1.5)</span></div>
+      <div class="speed-legend-item"><div class="speed-color-box" style="background:#84CC16;"></div><span>Normal (1.5–2.5)</span></div>
+      <div class="speed-legend-item"><div class="speed-color-box" style="background:#FACC15;"></div><span>Outdated (2.5–3.5)</span></div>
+      <div class="speed-legend-item"><div class="speed-color-box" style="background:#F97316;"></div><span>Bad (3.5–4.5)</span></div>
+      <div class="speed-legend-item"><div class="speed-color-box" style="background:#DC2626;"></div><span>No Road (4.5–5.0)</span></div>
+    </div>
+  </div>
+
+  <!-- Braking legend — concentration only -->
+  <div class="legend" id="brakingLegend" style="display:none;">
+    <strong>SUDDEN BRAKING</strong>
+    <p style="margin:4px 0 8px; font-size:0.75rem; opacity:0.8;">Colour &amp; size = event concentration</p>
+    <div class="speed-legend-item"><div class="speed-color-box" style="background:#FFF176;"></div><span>1–2 events</span></div>
+    <div class="speed-legend-item"><div class="speed-color-box" style="background:#FF9800;"></div><span>3–7 events</span></div>
+    <div class="speed-legend-item"><div class="speed-color-box" style="background:#D32F2F;"></div><span>8–19 events</span></div>
+    <div class="speed-legend-item"><div class="speed-color-box" style="background:#9C27B0;"></div><span>20+ events</span></div>
+  </div>
+
+  <!-- Crash / fall legend — populated once by renderCrashLegend(); all three
+       dimensions (intensity/type/outcome) are shown at once, so there's no
+       mode to switch and no sub-blocks to toggle. -->
+  <div class="legend" id="crashLegend" style="display:none;">
+    <!-- populated dynamically by renderCrashLegend() -->
+  </div>
+
+  <div class="legend" id="sensorLegend" style="display:none;">
+    <!-- populated dynamically by renderSensorLegend() -->
+  </div>
+
+</div>
+
+<script>
+  // ── Fullscreen ────────────────────────────────────────────────
+  const fullscreenBtn  = document.getElementById('fullscreenBtn');
+  const mapContainer   = document.getElementById('mapContainer');
+
+  fullscreenBtn.addEventListener('click', () => {
+    if (!document.fullscreenElement &&
+        !document.webkitFullscreenElement &&
+        !document.mozFullScreenElement &&
+        !document.msFullscreenElement) {
+      (mapContainer.requestFullscreen || mapContainer.webkitRequestFullscreen ||
+       mapContainer.mozRequestFullScreen || mapContainer.msRequestFullscreen).call(mapContainer);
+    } else {
+      (document.exitFullscreen || document.webkitExitFullscreen ||
+       document.mozCancelFullScreen || document.msExitFullscreen).call(document);
+    }
+  });
+
+  function updateFullscreenButton() {
+    const isFS = document.fullscreenElement || document.webkitFullscreenElement ||
+                 document.mozFullScreenElement || document.msFullscreenElement;
+    fullscreenBtn.title = isFS ? 'Exit Fullscreen' : 'Enter Fullscreen';
+  }
+  document.addEventListener('fullscreenchange',       updateFullscreenButton);
+  document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
+  document.addEventListener('mozfullscreenchange',    updateFullscreenButton);
+  document.addEventListener('MSFullscreenChange',     updateFullscreenButton);
+
+  // ── Manual panel ──────────────────────────────────────────────
+  const manualPanel     = document.getElementById('manualPanel');
+  const manualToggleBtn = document.getElementById('manualToggleBtn');
+  const manualCloseBtn  = document.getElementById('manualCloseBtn');
+  manualToggleBtn.addEventListener('click', () => manualPanel.classList.toggle('open'));
+  manualCloseBtn.addEventListener('click',  () => manualPanel.classList.remove('open'));
+
+  // ── Mobile controls tab ───────────────────────────────────────
+  const controlsPanel = document.getElementById('controls');
+  const controlsTab   = document.getElementById('controlsTab');
+  controlsTab.addEventListener('click', () => {
+    const isOpen = controlsPanel.classList.toggle('open');
+    controlsTab.classList.toggle('open', isOpen);
+    controlsTab.textContent = isOpen ? '✕' : 'Filters';
+    mapContainer.classList.toggle('filters-open', isOpen);
+  });
+
+  // ── Legend switching for averaged segments ────────────────────
+  document.querySelectorAll('input[name="averagedMode"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      document.getElementById('compositeLegendItems').style.display  = 'none';
+      document.getElementById('avgSpeedLegendItems').style.display   = 'none';
+      document.getElementById('avgQualityLegendItems').style.display = 'none';
+      const map = { composite: 'compositeLegendItems', speed: 'avgSpeedLegendItems', quality: 'avgQualityLegendItems' };
+      document.getElementById(map[e.target.value]).style.display = 'block';
+    });
+  });
+
+</script>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

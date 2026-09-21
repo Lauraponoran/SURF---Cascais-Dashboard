@@ -1,0 +1,1043 @@
+/* styles.css */
+
+:root {
+  --sc-cyan: #34CCCC;
+  --sc-gold: #FFCC33;
+  --sc-panel-bg: rgba(10, 16, 24, 0.55);
+  --sc-panel-border: rgba(52, 204, 204, 0.15);
+  --sc-text: #b8cad8;
+  --sc-text-bright: #dce8f0;
+  --sc-text-dim: rgba(184, 202, 216, 0.45);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Rajdhani', sans-serif;
+  background: #000;
+  color: var(--sc-text);
+}
+
+#map {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+}
+
+/* Hide scrollbars globally */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+}
+
+/* Controls Panel */
+#controls {
+  position: absolute;
+  z-index: 1;
+  top: 10px;
+  left: 10px;
+  background: var(--sc-panel-bg);
+  border: 1px solid var(--sc-panel-border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: 15px;
+  border-radius: 6px;
+  min-width: 260px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  color: var(--sc-text);
+}
+
+h3 {
+  margin: 0 0 15px 0;
+  font-size: 17px;
+  border-bottom: 2px solid #ddd;
+  padding-bottom: 8px;
+}
+
+#controls h3 {
+  font-family: 'Rajdhani', sans-serif;
+  color: var(--sc-gold);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  border-bottom-color: var(--sc-panel-border);
+}
+
+.control-group {
+  margin-bottom: 15px;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--sc-text);
+}
+
+.control-group > label:not(.checkbox-label):not(.radio-label) {
+  color: var(--sc-cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+select {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: var(--sc-text);
+}
+.checkbox-label:hover {
+  color: var(--sc-text-bright);
+}
+
+.sub-controls {
+  margin-left: 24px;
+  padding-left: 12px;
+  border-left: 2px solid #ddd;
+  margin-top: 8px;
+}
+
+.sub-controls .control-group {
+  margin-bottom: 12px;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
+  margin-right: 8px;
+  width: 15px;
+  height: 15px;
+  border: 1.5px solid rgba(52, 204, 204, 0.3);
+  border-radius: 3px;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s;
+  vertical-align: middle;
+}
+input[type="radio"] {
+  border-radius: 50%;
+}
+input[type="checkbox"]:checked,
+input[type="radio"]:checked {
+  background: var(--sc-cyan);
+  border-color: var(--sc-cyan);
+  box-shadow: 0 0 6px rgba(52, 204, 204, 0.25);
+}
+input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 10px;
+  color: #0a1018;
+  font-weight: 700;
+}
+input[type="radio"]:checked::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #0a1018;
+}
+
+input[type="range"] {
+  width: 100%;
+  cursor: pointer;
+}
+
+.slider-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+}
+
+.radio-group {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 13px;
+  font-weight: normal;
+  cursor: pointer;
+  color: var(--sc-text);
+}
+.radio-label:hover {
+  color: var(--sc-text-bright);
+}
+
+/* Search widget */
+/* Reset Button */
+#resetButton {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 5px;
+  margin-top: 20px;
+  background: rgba(52, 204, 204, 0.06);
+  color: var(--sc-text);
+  border: 1px solid var(--sc-panel-border);
+  border-radius: 5px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  cursor: pointer;
+  display: none;
+  transition: all 0.2s;
+}
+#resetButton:hover {
+  border-color: var(--sc-cyan);
+  color: var(--sc-cyan);
+}
+#resetButton:active {
+  transform: scale(0.98);
+}
+
+/* ── averagedModeGroup ────────────────────────────────────────
+   Desktop: hidden by default, shown as column via JS.
+   Mobile:  same inline style — NO white bar override.
+   ────────────────────────────────────────────────────────── */
+#averagedModeGroup {
+  display: none;
+}
+
+/* All legends default to bottom right corner */
+.legend {
+  position: absolute;
+  bottom: 20px;
+  right: 10px;
+  background: var(--sc-panel-bg);
+  border: 1px solid var(--sc-panel-border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: 12px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  display: none;
+  max-width: 220px;
+  color: var(--sc-text);
+}
+
+.legend h4 {
+  margin: 0 0 10px 0;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 14px;
+  color: var(--sc-cyan);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+
+.legend-note {
+  font-size: 11px;
+  margin: 0 0 8px 0;
+  color: var(--sc-text-dim);
+  font-style: italic;
+}
+
+.speed-legend-item {
+  display: flex;
+  align-items: center;
+  margin: 5px 0;
+  font-size: 12px;
+}
+
+.speed-legend-item span {
+  color: var(--sc-text);
+  font-family: 'Rajdhani', sans-serif;
+}
+
+.sensor-legend-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.sensor-legend-item.active {
+  outline: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 4px;
+}
+
+/* Sensor legend: cap to ~5 rows and scroll for the rest, with the
+   "Sensors" title pinned at the top of the scroll area.
+   NOTE: #sensorLegend is itself the scrolling element (overflow-y: auto)
+   but it also carries .legend's padding: 12px on all sides. If that top
+   padding stayed in place, it would sit inside the scrollport ahead of
+   the sticky <h4>, leaving a permanent gap above the title that no
+   amount of scrolling removes. So we zero out the container's top
+   padding and re-add the same visual spacing on the title itself,
+   which scrolls out of the way normally and then sticks flush. */
+#sensorLegend {
+  max-height: 140px; /* was 170px — with ~8-9 sensors at roughly
+                         24-26px per row, 170px left just enough
+                         headroom that a shorter list might not
+                         overflow at all, meaning no thumb could ever
+                         render no matter how the scrollbar is styled.
+                         140px reliably forces overflow (and therefore
+                         a persistent, visible thumb) once there are
+                         more than ~4-5 sensors. */
+  overflow-y: scroll; /* was auto — scroll guarantees the track is
+                          always rendered rather than only when the
+                          browser recalculates that content overflows */
+  /* FIX: only overflow-y was set here, and per spec a lone non-visible
+     overflow-y silently forces overflow-x to compute as "auto" too
+     (not "visible"). That let the uppercase, letter-spaced "SENSORS"
+     title trip horizontal scroll/clip behavior instead of just sitting
+     flush — reading as "cut off" on the right. Pin it to hidden so the
+     box never scrolls or clips horizontally. */
+  overflow-x: hidden;
+  padding-top: 0;
+
+  /* Reserve the scrollbar's track space permanently (rather than only
+     when a scrollbar is actually needed) so it doesn't shift layout
+     and reads as consistently "always there". */
+  scrollbar-gutter: stable;
+
+  /* Scrollbars are hidden globally (see `* { scrollbar-width: none }`
+     above) for aesthetic reasons, but that leaves this box with zero
+     affordance that it scrolls. Re-enable a thin, theme-colored
+     scrollbar scoped to just this element — an ID selector beats the
+     universal `*` rule, so this wins without touching the global hide. */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(52, 204, 204, 0.6) transparent;
+}
+#sensorLegend::-webkit-scrollbar {
+  display: block;
+  width: 5px;
+}
+#sensorLegend::-webkit-scrollbar-track {
+  background: transparent;
+}
+#sensorLegend::-webkit-scrollbar-thumb {
+  background: rgba(52, 204, 204, 0.6);
+  border-radius: 3px;
+  min-height: 24px;
+}
+#sensorLegend::-webkit-scrollbar-thumb:hover {
+  background: rgba(52, 204, 204, 0.85);
+}
+
+#sensorLegend h4 {
+  position: sticky;
+  top: 0;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-radius: 6px 6px 0 0;
+  margin: -12px -12px 10px -12px;
+  padding: 12px 12px 8px 12px;
+  z-index: 1;
+  width: calc(100% + 24px);
+  box-sizing: border-box;
+  text-align: center;
+  transition: background 0.15s ease, backdrop-filter 0.15s ease;
+}
+#sensorLegend.is-scrolled h4 {
+  background: rgba(10, 16, 24, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.speed-color-box {
+  width: 30px;
+  height: 4px;
+  margin-right: 8px;
+  border-radius: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Averaged segments sub-legends: only composite shown by default */
+#avgSpeedLegendItems,
+#avgQualityLegendItems {
+  display: none;
+}
+
+/* ── Crash & Falls legend — accordion ─────────────────────────────────────
+   Three dimensions (Intensity / Classification / Outcome), each collapsed
+   behind a tap so the panel stays short instead of listing everything at
+   once. Falls back to the shared .legend sizing/positioning above; this
+   just adds the accordion + scroll behaviour and matches the existing
+   panel theme (cyan accents, Rajdhani labels, dim panel borders).
+   ────────────────────────────────────────────────────────────────────── */
+#crashLegend {
+  max-height: 320px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+#crashLegend::-webkit-scrollbar { width: 6px; }
+#crashLegend::-webkit-scrollbar-track { background: transparent; }
+#crashLegend::-webkit-scrollbar-thumb {
+  background: var(--sc-panel-border);
+  border-radius: 3px;
+}
+
+#crashLegend .cl-sub {
+  margin: 0 0 10px 0;
+  font-size: 11px;
+  color: var(--sc-text-dim);
+  font-style: italic;
+  line-height: 1.4;
+}
+
+#crashLegend .cl-cat {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--sc-panel-border);
+  border-radius: 4px;
+  padding: 7px 9px;
+  margin-top: 6px;
+  color: var(--sc-text-bright);
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  text-align: left;
+}
+
+#crashLegend .cl-cat:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+#crashLegend .cl-cat-name { flex: 1; }
+
+#crashLegend .cl-chevron {
+  flex: 0 0 auto;
+  font-size: 10px;
+  color: var(--sc-cyan);
+  transition: transform 0.15s ease;
+}
+
+#crashLegend .cl-cat[aria-expanded="true"] .cl-chevron {
+  transform: rotate(90deg);
+}
+
+#crashLegend .cl-panel {
+  display: none;
+  padding: 8px 2px 2px 4px;
+}
+
+#crashLegend .cl-panel[data-open="true"] { display: block; }
+
+#crashLegend .cl-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 5px 0;
+  font-size: 12px;
+}
+
+#crashLegend .cl-row-label {
+  flex: 1;
+  color: var(--sc-text);
+  font-family: 'Rajdhani', sans-serif;
+}
+
+#crashLegend .cl-swatch {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+#crashLegend .cl-swatch--glyph {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--sc-text-bright);
+  font-size: 10px;
+  line-height: 1;
+}
+
+#crashLegend .cl-swatch--outcome {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+#crashLegend .cl-swatch--outcome.unresolved {
+  border: 3px solid #fff;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* Filter accordion (inside top-left controls panel) */
+.filter-accordion {
+  margin-bottom: 15px;
+}
+
+.filter-accordion-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--sc-panel-border);
+  border-radius: 4px;
+  padding: 8px 10px;
+  color: var(--sc-cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  font-weight: 600;
+  font-size: 12px;
+  font-family: 'Rajdhani', sans-serif;
+  cursor: pointer;
+}
+
+.filter-accordion-header:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.filter-accordion-chevron {
+  font-size: 14px;
+}
+
+.filter-accordion-content {
+  margin-top: 8px;
+  padding: 10px;
+  border: 1px solid var(--sc-panel-border);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.filter-section {
+  margin-bottom: 12px;
+}
+
+.filter-section:last-child {
+  margin-bottom: 0;
+}
+
+.filter-section-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--sc-text-dim);
+  margin-bottom: 6px;
+}
+
+.filter-sensor-item {
+  display: flex;
+  align-items: center;
+  margin: 5px 0;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.filter-sensor-item input[type="checkbox"] {
+  margin: 0 8px 0 0;
+  accent-color: var(--sc-cyan);
+  cursor: pointer;
+}
+
+.filter-sensor-item span {
+  color: var(--sc-text);
+  font-family: 'Rajdhani', sans-serif;
+}
+
+.filter-sensor-all {
+  padding-bottom: 6px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--sc-panel-border);
+  font-weight: 600;
+}
+
+.filter-sensor-all span {
+  color: var(--sc-text-bright);
+}
+
+#filterSensorList {
+  max-height: 160px;
+  overflow-y: auto;
+  padding-left: 2px;
+}
+
+.filter-accordion-content input,
+.filter-accordion-content select,
+.filter-accordion-content button {
+  box-sizing: border-box;
+}
+
+.filter-date-range {
+  display: flex;
+  gap: 8px;
+}
+
+.filter-date-field {
+  flex: 1;
+  min-width: 0;
+}
+
+.filter-date-field label {
+  display: block;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--sc-text-dim);
+  margin-bottom: 3px;
+}
+
+.filter-date-field input[type="date"] {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid var(--sc-panel-border);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--sc-text-bright);
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 12px;
+  color-scheme: dark; /* makes Chrome/Edge render the native calendar popup dark */
+}
+
+.filter-date-field input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.8);
+  cursor: pointer;
+}
+
+.filter-date-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.filter-preset-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--sc-panel-border);
+  border-radius: 12px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-family: 'Rajdhani', sans-serif;
+  color: var(--sc-text);
+  cursor: pointer;
+}
+
+.filter-preset-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--sc-text-bright);
+}
+
+.filter-preset-btn.active {
+  background: var(--sc-cyan);
+  border-color: var(--sc-cyan);
+  color: #06181c;
+  font-weight: 600;
+}
+
+.filter-match-count {
+  margin-top: 10px;
+  font-size: 11px;
+  color: var(--sc-text-dim);
+  font-style: italic;
+}
+
+/* Stats Panel */
+#stats {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: var(--sc-panel-bg);
+  border: 1px solid var(--sc-panel-border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: 12px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  font-size: 13px;
+  color: var(--sc-text);
+}
+
+#stats h4 {
+  margin: 0 0 8px 0;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 14px;
+  color: var(--sc-cyan);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 4px 0;
+  min-width: 200px;
+  border-bottom-color: rgba(52, 204, 204, 0.06);
+}
+
+.stat-label {
+  color: var(--sc-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  font-size: 12px;
+}
+
+.stat-value {
+  font-family: 'Share Tech Mono', monospace;
+  font-weight: 700;
+  color: var(--sc-gold);
+}
+
+#selectedTripRow {
+  display: none;
+}
+
+/* Fullscreen Button */
+#fullscreenBtn {
+  position: absolute;
+  z-index: 1;
+  top: 10px;
+  right: 10px;
+  background: var(--sc-panel-bg);
+  border: 1px solid var(--sc-panel-border);
+  border-radius: 5px;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: var(--sc-cyan);
+  font-family: 'Rajdhani', sans-serif;
+  backdrop-filter: blur(14px);
+  transition: border-color 0.2s;
+}
+#fullscreenBtn:hover {
+  border-color: var(--sc-cyan);
+}
+#fullscreenBtn:active {
+  transform: scale(0.95);
+}
+
+/* Fullscreen container */
+#mapContainer {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+}
+
+#mapContainer:fullscreen,
+#mapContainer:-webkit-full-screen,
+#mapContainer:-moz-full-screen,
+#mapContainer:-ms-fullscreen {
+  width: 100vw;
+  height: 100vh;
+}
+
+#mapContainer:fullscreen #fullscreenBtn,
+#mapContainer:-webkit-full-screen #fullscreenBtn,
+#mapContainer:-moz-full-screen #fullscreenBtn,
+#mapContainer:-ms-fullscreen #fullscreenBtn {
+  top: 10px;
+  right: 10px;
+}
+
+/* Manual Toggle Button */
+#manualToggleBtn {
+  position: absolute;
+  z-index: 2;
+  top: 60px;
+  right: 10px;
+  background: var(--sc-panel-bg);
+  border: 1px solid var(--sc-panel-border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--sc-cyan);
+  font-family: 'Rajdhani', sans-serif;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  backdrop-filter: blur(14px);
+  transition: border-color 0.2s;
+}
+#manualToggleBtn:hover {
+  border-color: var(--sc-cyan);
+}
+
+/* Manual Panel */
+#manualPanel {
+  position: absolute;
+  top: 0;
+  right: -420px;
+  width: 400px;
+  height: 100%;
+  background: rgba(8, 12, 20, 0.92);
+  border: 1px solid var(--sc-panel-border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: -2px 0 10px rgba(0,0,0,0.25);
+  z-index: 10000; /* above #controlsTab's 9999, so it fully covers the
+                      Filters toggle when open, incl. in fullscreen */
+  display: flex;
+  flex-direction: column;
+  transition: right 0.3s ease;
+  color: var(--sc-text);
+}
+
+#manualPanel.open {
+  right: 0;
+}
+
+.manual-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 2px solid var(--sc-panel-border);
+}
+
+.manual-header h3 {
+  margin: 0;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 16px;
+  color: var(--sc-gold);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  font-weight: 700;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+#manualCloseBtn {
+  background: none;
+  border: 1px solid var(--sc-panel-border);
+  border-radius: 4px;
+  font-size: 18px;
+  cursor: pointer;
+  color: var(--sc-text-dim);
+  transition: all 0.2s;
+}
+#manualCloseBtn:hover {
+  color: var(--sc-cyan);
+  border-color: var(--sc-cyan);
+}
+
+.manual-content {
+  padding: 16px;
+  overflow-y: auto;
+  font-size: 13px;
+  color: var(--sc-text);
+}
+
+.manual-content section {
+  margin-bottom: 18px;
+  border-bottom-color: rgba(52, 204, 204, 0.08);
+}
+
+.manual-content h4 {
+  margin: 0 0 6px 0;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 14px;
+  color: var(--sc-cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-weight: 700;
+}
+
+.manual-content h5 {
+  margin: 10px 0 4px 0;
+  font-size: 13px;
+  color: var(--sc-gold);
+  font-weight: 600;
+}
+
+.manual-content p {
+  margin: 6px 0;
+  line-height: 1.55;
+  color: var(--sc-text);
+  font-family: 'Rajdhani', sans-serif;
+}
+
+.manual-content strong {
+  color: var(--sc-text-bright);
+}
+
+.manual-content ul {
+  padding-left: 18px;
+  margin: 6px 0;
+}
+
+.manual-content li {
+  margin-bottom: 6px;
+}
+
+.manual-content .note {
+  font-size: 12px;
+  color: var(--sc-text-dim);
+  font-style: italic;
+  background: rgba(255, 204, 51, 0.12);
+  border-left: 2px solid var(--sc-gold);
+  padding: 4px 8px;
+}
+
+/* MapLibre control overrides */
+.maplibregl-ctrl-group {
+  background: var(--sc-panel-bg);
+  border: 1px solid var(--sc-panel-border);
+  border-radius: 5px;
+  backdrop-filter: blur(14px);
+}
+.maplibregl-ctrl-group button {
+  background: transparent;
+  border-color: var(--sc-panel-border);
+}
+.maplibregl-ctrl-group button span {
+  filter: invert(1) brightness(0.8) sepia(1) hue-rotate(130deg) saturate(0.6);
+}
+.maplibregl-ctrl-attrib {
+  background: rgba(0, 0, 0, 0.4);
+  color: rgba(176, 196, 216, 0.3);
+}
+.maplibregl-ctrl-attrib a {
+  color: var(--sc-cyan);
+  opacity: 0.4;
+}
+.maplibregl-popup-content {
+  background: rgba(10, 16, 24, 0.72);
+  border: 1px solid var(--sc-panel-border);
+  border-radius: 6px;
+  color: var(--sc-text);
+  font-family: 'Rajdhani', sans-serif;
+  backdrop-filter: blur(16px);
+}
+
+/* ── Controls tab (mobile slide-out handle) ──────────────────
+   Positioned top-left with spacing. Horizontal pill button.
+   Uses position:fixed so it persists in fullscreen too.     */
+#controlsTab {
+  display: none; /* hidden on desktop; shown via media query below */
+  position: fixed;
+  top: 6px; /* was 14px — with the button's own padding/border it was
+               ~34px tall, putting its bottom edge right against the
+               "BIKE ROUTES" title underline below it */
+  left: 10px;
+  transform: none;
+  z-index: 9999;
+  writing-mode: horizontal-tb;
+  text-orientation: mixed;
+  background: var(--sc-panel-bg);
+  border: 1px solid var(--sc-panel-border);
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sc-cyan);
+  cursor: pointer;
+  backdrop-filter: blur(14px);
+  transition: background 0.2s, left 0.3s ease;
+  user-select: none;
+  white-space: nowrap;
+}
+#controlsTab.open {
+  left: 224px; /* panel is 280px wide with 15px padding (same padding
+                  that insets Filter Trips and the checkboxes), and
+                  the tab itself is ~41px wide, so 280 - 15 - 41 = 224
+                  lines its right edge up with that same 15px margin. */
+}
+#controlsTab:hover {
+  background: rgba(52, 204, 204, 0.12);
+}
+
+/* Keep tab visible when the map container enters fullscreen */
+#mapContainer:fullscreen #controlsTab,
+#mapContainer:-webkit-full-screen #controlsTab,
+#mapContainer:-moz-full-screen #controlsTab,
+#mapContainer:-ms-fullscreen #controlsTab {
+  display: flex;
+  z-index: 9999;
+  position: fixed;
+  top: 6px;
+  left: 10px;
+}
+
+/* ── Mobile ──────────────────────────────────────────────────
+   FIX: Threshold raised from 768px to 900px for broader
+   mobile/tablet coverage. Controls offscreen offset matched
+   to panel width so it fully hides. */
+@media (max-width: 900px) {
+
+  /* Controls panel: collapsed off-screen by default,
+     slides in when .open is toggled by the tab button.
+     Fixed width (not just min-width) + hidden x-overflow +
+     an offset past the box-shadow's blur radius keeps the
+     whole panel — including its shadow — off-screen while
+     closed, so no sliver peeks in from the left edge. */
+  #controls {
+    position: fixed;
+    top: 0;
+    left: -300px;
+    width: 280px;
+    box-sizing: border-box;
+    height: 100%;
+    max-height: 100%;
+    border-radius: 0;
+    z-index: 100;
+    transition: left 0.3s ease;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+  #controls.open {
+    left: 0;
+  }
+
+  /* Show the tab handle on mobile */
+  #controlsTab {
+    display: flex;
+  }
+
+  #stats,
+  .legend {
+    font-size: 12px;
+    max-width: 200px;
+  }
+
+  #manualPanel {
+    width: 100%;
+    right: -100%;
+  }
+}

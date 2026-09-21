@@ -1,0 +1,59 @@
+name: Generate trips GeoJSON
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install psycopg2-binary python-dotenv numpy
+
+      - name: Generate trips.geojson
+        env:
+          SUPABASE_HOST:     ${{ secrets.SUPABASE_HOST }}
+          SUPABASE_PORT:     ${{ secrets.SUPABASE_PORT }}
+          SUPABASE_DB:       ${{ secrets.SUPABASE_DB }}
+          SUPABASE_USER:     ${{ secrets.SUPABASE_USER }}
+          SUPABASE_PASSWORD: ${{ secrets.SUPABASE_PASSWORD }}
+        run: python generate_trips_geojson.py
+
+      - name: Generate road_segments_averaged.json
+        run: python road_averaging.py
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add trips.geojson road_segments_averaged.json 
+
+          # Only commit if any file actually changed
+          if git diff --cached --quiet; then
+            echo "No changes — skipping commit"
+            exit 0
+          fi
+
+          git commit -m "chore: regenerate trips.geojson + road_segments_averaged.json [skip ci]"
+
+          # Pull latest remote changes, keep our freshly generated files
+          git fetch origin main
+          git checkout origin/main -- .
+          git checkout HEAD -- trips.geojson road_segments_averaged.json 
+          git add trips.geojson road_segments_averaged.json
+          git commit --allow-empty -m "chore: regenerate trips + road segments [skip ci]"
+          git push origin HEAD:main
